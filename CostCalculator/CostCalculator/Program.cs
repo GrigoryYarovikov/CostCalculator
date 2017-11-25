@@ -3,8 +3,9 @@
 //первая версия - 2 часа
 //написание тестов и проверка - 1 час
 //добавление переносимости (generic) - 1.5 часа
-//
+//добовление переносимости (вынос основы калькулятора в отдельный класс) - 0.5 часа
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -15,11 +16,10 @@ namespace CostCalculator
         /// <summary>
         /// тестирование класса калькулятора
         /// </summary>
-        /// <param name="args"></param>
         static void Main(string[] args)
         {
             var repository = new ConstStringRepository();
-            var calculator = new CostCalculator<string>(repository);
+            var calculator = new CostCalculatorVer1<string>(repository);
             {//тест A B, сумма до скидки 100, 10%
                 var products = new List<Product>
                 {
@@ -181,6 +181,8 @@ namespace CostCalculator
                 var cost = calculator.CalculateCost(products);
                 Debug.Assert(cost == 185);
             }
+            Console.WriteLine("Tests passed successed. Press any key...");
+            Console.Read();
         }
     }
 }

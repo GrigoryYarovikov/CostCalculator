@@ -4,36 +4,23 @@ using System.Linq;
 
 namespace CostCalculator
 {
-    class CostCalculator<T>
+    class CostCalculatorVer1<T>: CostCalculatorBase<T>
     {
-        public CostCalculator(ISaleItemsRepository<T> repository)
-        {
-            _repository = repository;
-        }
-        ISaleItemsRepository<T> _repository;
+        public CostCalculatorVer1(ISaleItemsRepository<T> repository): base(repository) { }
 
         /// <summary>
-        /// Подсчитывает стоимость с учетом скидок
+        /// set calculate rules
         /// </summary>
-        public decimal CalculateCost(IEnumerable<IProductComparable<T>> products)
+        protected override void SetRules()
         {
-            if (products == null)
+            _rules = new List<Func<CalculateUnit<T>, CalculateUnit<T>>>
             {
-                throw new ArgumentNullException();
-            }
-
-            var unit = new CalculateUnit<T>
-            {
-                NotCalculatedProducts = products.ToList()
+                SaleAB,
+                SaleDE,
+                SaleEFG,
+                SaleAKLM,
+                SaleByCount
             };
-
-            var result = SaleAB(unit);
-            result = SaleDE(result);
-            result = SaleEFG(result);
-            result = SaleAKLM(result);
-            result = SaleByCount(result);
-
-            return result.Cost + result.NotCalculatedProducts.Sum(x => x.Cost);
         }
 
         /// <summary>
@@ -138,35 +125,6 @@ namespace CostCalculator
             var count = 5;
             var discount = 0.2m;
             return SaleCountProcess(unit, count, discount);
-        }
-
-        CalculateUnit<T> SaleCountProcess(CalculateUnit<T> unit, int count, decimal discount)
-        {
-            if (unit.NotCalculatedProducts.Count >= count)
-            {
-                var costTotal = unit.NotCalculatedProducts.Take(count).Sum(x => x.Cost);
-                unit.Cost += costTotal - costTotal * discount;
-                unit.NotCalculatedProducts.RemoveRange(0, count);
-                return SaleCountProcess(unit, count, discount);
-            }
-            return unit;
-        }
-
-        CalculateUnit<T> SaleGroupProcess(CalculateUnit<T> unit, IEnumerable<T> ids, decimal discount)
-        {
-            var useInDiscount = new List<IProductComparable<T>>();
-            foreach (var id in ids)
-            {
-                useInDiscount.Add(unit.NotCalculatedProducts.FirstOrDefault(x => x.IsMatch(id)));
-            }
-            if (!useInDiscount.Any(x => x == null))
-            {
-                var costTotal = useInDiscount.Sum(x => x.Cost);
-                unit.Cost += costTotal - costTotal * discount;
-                unit.NotCalculatedProducts = unit.NotCalculatedProducts.Except(useInDiscount).ToList();
-                return SaleGroupProcess(unit, ids, discount);
-            }
-            return unit;
         }
     }
 }
