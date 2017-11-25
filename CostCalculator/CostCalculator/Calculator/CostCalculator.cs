@@ -1,21 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CostCalculator
 {
-    class CostCalculator
+    class CostCalculator<T>
     {
-        public decimal CalculateCost(IEnumerable<Product> products)
+        public CostCalculator(ISaleItemsRepository<T> repository)
+        {
+            _repository = repository;
+        }
+        ISaleItemsRepository<T> _repository;
+
+        /// <summary>
+        /// Подсчитывает стоимость с учетом скидок
+        /// </summary>
+        public decimal CalculateCost(IEnumerable<IProductComparable<T>> products)
         {
             if (products == null)
             {
                 throw new ArgumentNullException();
             }
 
-            var unit = new CalculateUnit
+            var unit = new CalculateUnit<T>
             {
                 NotCalculatedProducts = products.ToList()
             };
@@ -33,64 +40,64 @@ namespace CostCalculator
         /// A && B
         /// 10%
         /// </summary>
-        CalculateUnit SaleAB(CalculateUnit unit)
+        CalculateUnit<T> SaleAB(CalculateUnit<T> unit)
         {
-            var names = new List<string> { Constants.A, Constants.B };
+            var ids = new List<T> { _repository.A, _repository.B };
             var discount = 0.1m;
-            return SaleGroupProcess(unit, names, discount);
+            return SaleGroupProcess(unit, ids, discount);
         }
 
         /// <summary>
         /// D && E
         /// 5%
         /// </summary>
-        CalculateUnit SaleDE(CalculateUnit unit)
+        CalculateUnit<T> SaleDE(CalculateUnit<T> unit)
         {
-            var names = new List<string> { Constants.D, Constants.E };
+            var ids = new List<T> { _repository.D, _repository.E };
             var discount = 0.05m;
-            return SaleGroupProcess(unit, names, discount);
+            return SaleGroupProcess(unit, ids, discount);
         }
 
         /// <summary>
         /// E && F && G
         /// 5%
         /// </summary>
-        CalculateUnit SaleEFG(CalculateUnit unit)
+        CalculateUnit<T> SaleEFG(CalculateUnit<T> unit)
         {
-            var names = new List<string> { Constants.E, Constants.G, Constants.F };
+            var ids = new List<T> { _repository.E, _repository.G, _repository.F };
             var discount = 0.05m;
-            return SaleGroupProcess(unit, names, discount);
+            return SaleGroupProcess(unit, ids, discount);
         }
 
         /// <summary>
         /// A && [K || L || M]
         /// 5%
         /// </summary>
-        CalculateUnit SaleAKLM(CalculateUnit unit)
+        CalculateUnit<T> SaleAKLM(CalculateUnit<T> unit)
         {
             var discount = 0.05m;
-            var names = new List<string> { Constants.A, Constants.K };
-            var result = SaleGroupProcess(unit, names, discount);
+            var ids = new List<T> { _repository.A, _repository.K };
+            var result = SaleGroupProcess(unit, ids, discount);
 
-            names = new List<string> { Constants.A, Constants.L };
-            result = SaleGroupProcess(result, names, discount);
+            ids = new List<T> { _repository.A, _repository.L };
+            result = SaleGroupProcess(result, ids, discount);
 
-            names = new List<string> { Constants.A, Constants.M };
-            return SaleGroupProcess(result, names, discount);
+            ids = new List<T> { _repository.A, _repository.M };
+            return SaleGroupProcess(result, ids, discount);
         }
 
         /// <summary>
         /// count == 5 || 4 || 3
         /// except A, C
         /// </summary>
-        CalculateUnit SaleByCount(CalculateUnit unit)
+        CalculateUnit<T> SaleByCount(CalculateUnit<T> unit)
         {
-            var exceptNames = new List<string> { Constants.A, Constants.C };
-            var exceptProducts = unit.NotCalculatedProducts.Where(x => exceptNames.Contains(x.Name));
-            var filteredUnit = new CalculateUnit
+            var exceptNames = new List<T> { _repository.A, _repository.C };
+            var exceptProducts = unit.NotCalculatedProducts.Where(x => exceptNames.Contains(x.Id));
+            var filteredUnit = new CalculateUnit<T>
             {
                 Cost = unit.Cost,
-                NotCalculatedProducts = unit.NotCalculatedProducts.Where(x => !exceptNames.Contains(x.Name)).ToList()
+                NotCalculatedProducts = unit.NotCalculatedProducts.Where(x => !exceptNames.Contains(x.Id)).ToList()
             };
             var result = Sale5(filteredUnit);
             result = Sale4(result);
@@ -104,7 +111,7 @@ namespace CostCalculator
         /// count == 3
         /// 5%
         /// </summary>
-        CalculateUnit Sale3(CalculateUnit unit)
+        CalculateUnit<T> Sale3(CalculateUnit<T> unit)
         {
             var count = 3;
             var discount = 0.05m;
@@ -115,7 +122,7 @@ namespace CostCalculator
         /// count == 4
         /// 10%
         /// </summary>
-        CalculateUnit Sale4(CalculateUnit unit)
+        CalculateUnit<T> Sale4(CalculateUnit<T> unit)
         {
             var count = 4;
             var discount = 0.1m;
@@ -126,14 +133,14 @@ namespace CostCalculator
         /// count == 5
         /// 20%
         /// </summary>
-        CalculateUnit Sale5(CalculateUnit unit)
+        CalculateUnit<T> Sale5(CalculateUnit<T> unit)
         {
             var count = 5;
             var discount = 0.2m;
             return SaleCountProcess(unit, count, discount);
         }
 
-        CalculateUnit SaleCountProcess(CalculateUnit unit, int count, decimal discount)
+        CalculateUnit<T> SaleCountProcess(CalculateUnit<T> unit, int count, decimal discount)
         {
             if (unit.NotCalculatedProducts.Count >= count)
             {
@@ -145,19 +152,19 @@ namespace CostCalculator
             return unit;
         }
 
-        CalculateUnit SaleGroupProcess(CalculateUnit unit, IEnumerable<string> names, decimal discount)
+        CalculateUnit<T> SaleGroupProcess(CalculateUnit<T> unit, IEnumerable<T> ids, decimal discount)
         {
-            var useInDiscount = new List<Product>();
-            foreach (var name in names)
+            var useInDiscount = new List<IProductComparable<T>>();
+            foreach (var id in ids)
             {
-                useInDiscount.Add(unit.NotCalculatedProducts.FirstOrDefault(x => x.Name == name));
+                useInDiscount.Add(unit.NotCalculatedProducts.FirstOrDefault(x => x.IsMatch(id)));
             }
             if (!useInDiscount.Any(x => x == null))
             {
                 var costTotal = useInDiscount.Sum(x => x.Cost);
                 unit.Cost += costTotal - costTotal * discount;
                 unit.NotCalculatedProducts = unit.NotCalculatedProducts.Except(useInDiscount).ToList();
-                return SaleGroupProcess(unit, names, discount);
+                return SaleGroupProcess(unit, ids, discount);
             }
             return unit;
         }

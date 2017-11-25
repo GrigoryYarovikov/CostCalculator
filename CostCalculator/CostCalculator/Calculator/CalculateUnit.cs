@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace CostCalculator
 {
-    class Product
+    class CalculateUnit<T>
     {
-        public string Name { get; set; }
+        public List<IProductComparable<T>> NotCalculatedProducts { get; set; }
         public decimal Cost { get; set; }
     }
 }
