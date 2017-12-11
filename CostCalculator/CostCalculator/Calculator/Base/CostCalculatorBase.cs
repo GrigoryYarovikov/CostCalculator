@@ -95,18 +95,19 @@ namespace CostCalculator
         protected CalculateUnit<T> SaleGroupProcess(CalculateUnit<T> unit, IEnumerable<T> ids, decimal discount)
         {
             var useInDiscount = new List<IProductComparable<T>>();
+            var tmpStorage = new List<IProductComparable<T>>(unit.NotCalculatedProducts);
             foreach (var id in ids)
             {
-                useInDiscount.Add(unit.NotCalculatedProducts.FirstOrDefault(x => x.Id.CompareTo(id) == 0));
+                var findResult = tmpStorage.FirstOrDefault(x => x.Id.CompareTo(id) == 0);
+                if (findResult == null)
+                    return unit;
+                tmpStorage.Remove(findResult);
+                useInDiscount.Add(findResult);
             }
-            if (!useInDiscount.Any(x => x == null))
-            {
-                var costTotal = useInDiscount.Sum(x => x.Cost);
-                unit.Cost += costTotal - costTotal * discount;
-                unit.NotCalculatedProducts = unit.NotCalculatedProducts.Except(useInDiscount).ToList();
-                return SaleGroupProcess(unit, ids, discount);
-            }
-            return unit;
+            var costTotal = useInDiscount.Sum(x => x.Cost);
+            unit.Cost += costTotal - costTotal * discount;
+            unit.NotCalculatedProducts = unit.NotCalculatedProducts.Except(useInDiscount).ToList();
+            return SaleGroupProcess(unit, ids, discount);
         }
     }
 }

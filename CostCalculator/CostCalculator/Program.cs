@@ -4,6 +4,8 @@
 //написание тестов и проверка - 1 час
 //добавление переносимости (generic) - 1.5 часа
 //добовление переносимости (вынос основы калькулятора в отдельный класс) - 0.5 часа
+//изменил способ задания алфавита и проверки его корректности - 1 час
+//добавление правиа 4a + 5z = 8% . Реализация на существующих методах
 
 using CostCalculator.RulesSet1;
 using System;
@@ -181,6 +183,22 @@ namespace CostCalculator
                 };
                 var cost = calculator.CalculateCost(products);
                 Debug.Assert(cost == 185);
+            }
+            {//тест 4A 5z сумма до скидки 200, 8% = 184
+                var products = new List<Product>
+                {
+                    new Product { Id = "A", Cost = 25 },
+                    new Product { Id = "A", Cost = 25 },
+                    new Product { Id = "A", Cost = 25 },
+                    new Product { Id = "A", Cost = 25 },
+                    new Product { Id = "Z", Cost = 20 },
+                    new Product { Id = "Z", Cost = 20 },
+                    new Product { Id = "Z", Cost = 20 },
+                    new Product { Id = "Z", Cost = 20 },
+                    new Product { Id = "Z", Cost = 20 }
+                };
+                var cost = calculator.CalculateCost(products);
+                Debug.Assert(cost == 184);
             }
             Console.WriteLine("Tests passed successed. Press any key...");
             Console.Read();

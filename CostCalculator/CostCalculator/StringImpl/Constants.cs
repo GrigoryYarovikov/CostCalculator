@@ -17,5 +17,6 @@
         public const string M = "M";
         public const string N = "N";
         public const string O = "O";
+        public const string Z = "Z";
     }
 }

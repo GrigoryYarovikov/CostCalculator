@@ -19,6 +19,7 @@ namespace CostCalculator.RulesSet1
                 SaleDE,
                 SaleEFG,
                 SaleAKLM,
+                Sale4A5Z,
                 SaleByCount
             };
         }
@@ -129,6 +130,29 @@ namespace CostCalculator.RulesSet1
             var count = 5;
             var discount = 0.2m;
             return SaleCountProcess(unit, count, discount);
+        }
+
+        /// <summary>
+        /// count == 5
+        /// 20%
+        /// </summary>
+        CalculateUnit<T> Sale4A5Z(CalculateUnit<T> unit)
+        {
+            var discount = 0.08m;
+            var ids = new List<T> {
+                //4a
+                _repository.ElementAt(Alphabet.A),
+                _repository.ElementAt(Alphabet.A),
+                _repository.ElementAt(Alphabet.A),
+                _repository.ElementAt(Alphabet.A),
+                //5z
+                _repository.ElementAt(Alphabet.Z),
+                _repository.ElementAt(Alphabet.Z),
+                _repository.ElementAt(Alphabet.Z),
+                _repository.ElementAt(Alphabet.Z),
+                _repository.ElementAt(Alphabet.Z),
+            };
+            return SaleGroupProcess(unit, ids, discount);
         }
     }
 }

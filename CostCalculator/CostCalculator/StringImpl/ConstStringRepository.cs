@@ -16,7 +16,8 @@ namespace CostCalculator
             { Alphabet.G, Constants.G },
             { Alphabet.K, Constants.K },
             { Alphabet.L, Constants.L },
-            { Alphabet.M, Constants.M }
+            { Alphabet.M, Constants.M },
+            { Alphabet.Z, Constants.Z }
         };
 
         public string ElementAt(Alphabet index)
