@@ -5,6 +5,7 @@
 //добавление переносимости (generic) - 1.5 часа
 //добовление переносимости (вынос основы калькулятора в отдельный класс) - 0.5 часа
 
+using CostCalculator.RulesSet1;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

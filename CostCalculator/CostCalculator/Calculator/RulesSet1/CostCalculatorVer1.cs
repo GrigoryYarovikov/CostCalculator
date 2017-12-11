@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CostCalculator
+namespace CostCalculator.RulesSet1
 {
-    class CostCalculatorVer1<T>: CostCalculatorBase<T>
+    class CostCalculatorVer1<T>: CostCalculatorBase<T, Alphabet> where T: IComparable
     {
-        public CostCalculatorVer1(ISaleItemsRepository<T> repository): base(repository) { }
+        public CostCalculatorVer1(ISaleItemsRepository<T, Alphabet> repository): base(repository) { }
 
         /// <summary>
         /// set calculate rules
@@ -29,7 +29,7 @@ namespace CostCalculator
         /// </summary>
         CalculateUnit<T> SaleAB(CalculateUnit<T> unit)
         {
-            var ids = new List<T> { _repository.A, _repository.B };
+            var ids = new List<T> { _repository.ElementAt(Alphabet.A), _repository.ElementAt(Alphabet.B) };
             var discount = 0.1m;
             return SaleGroupProcess(unit, ids, discount);
         }
@@ -40,7 +40,7 @@ namespace CostCalculator
         /// </summary>
         CalculateUnit<T> SaleDE(CalculateUnit<T> unit)
         {
-            var ids = new List<T> { _repository.D, _repository.E };
+            var ids = new List<T> { _repository.ElementAt(Alphabet.D), _repository.ElementAt(Alphabet.E) };
             var discount = 0.05m;
             return SaleGroupProcess(unit, ids, discount);
         }
@@ -51,7 +51,11 @@ namespace CostCalculator
         /// </summary>
         CalculateUnit<T> SaleEFG(CalculateUnit<T> unit)
         {
-            var ids = new List<T> { _repository.E, _repository.G, _repository.F };
+            var ids = new List<T> {
+                _repository.ElementAt(Alphabet.E),
+                _repository.ElementAt(Alphabet.G),
+                _repository.ElementAt(Alphabet.F)
+            };
             var discount = 0.05m;
             return SaleGroupProcess(unit, ids, discount);
         }
@@ -63,13 +67,13 @@ namespace CostCalculator
         CalculateUnit<T> SaleAKLM(CalculateUnit<T> unit)
         {
             var discount = 0.05m;
-            var ids = new List<T> { _repository.A, _repository.K };
+            var ids = new List<T> { _repository.ElementAt(Alphabet.A), _repository.ElementAt(Alphabet.K) };
             var result = SaleGroupProcess(unit, ids, discount);
 
-            ids = new List<T> { _repository.A, _repository.L };
+            ids = new List<T> { _repository.ElementAt(Alphabet.A), _repository.ElementAt(Alphabet.L) };
             result = SaleGroupProcess(result, ids, discount);
 
-            ids = new List<T> { _repository.A, _repository.M };
+            ids = new List<T> { _repository.ElementAt(Alphabet.A), _repository.ElementAt(Alphabet.M) };
             return SaleGroupProcess(result, ids, discount);
         }
 
@@ -79,7 +83,7 @@ namespace CostCalculator
         /// </summary>
         CalculateUnit<T> SaleByCount(CalculateUnit<T> unit)
         {
-            var exceptNames = new List<T> { _repository.A, _repository.C };
+            var exceptNames = new List<T> { _repository.ElementAt(Alphabet.A), _repository.ElementAt(Alphabet.C) };
             var exceptProducts = unit.NotCalculatedProducts.Where(x => exceptNames.Contains(x.Id));
             var filteredUnit = new CalculateUnit<T>
             {

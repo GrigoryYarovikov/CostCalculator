@@ -43,14 +43,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Calculator\CalculateUnit.cs" />
-    <Compile Include="Calculator\CalculatorImpl\CostCalculatorVer1.cs" />
+    <Compile Include="Calculator\Base\CalculateUnit.cs" />
+    <Compile Include="Calculator\RulesSet1\Alphabet.cs" />
+    <Compile Include="Calculator\RulesSet1\CostCalculatorVer1.cs" />
     <Compile Include="StringImpl\ConstStringRepository.cs" />
-    <Compile Include="Calculator\ISaleItemsRepository.cs" />
+    <Compile Include="Calculator\Base\ISaleItemsRepository.cs" />
     <Compile Include="StringImpl\Constants.cs" />
-    <Compile Include="Calculator\IProductComparable.cs" />
+    <Compile Include="Calculator\Base\IProductComparable.cs" />
     <Compile Include="StringImpl\Product.cs" />
-    <Compile Include="Calculator\CostCalculatorBase.cs" />
+    <Compile Include="Calculator\Base\CostCalculatorBase.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

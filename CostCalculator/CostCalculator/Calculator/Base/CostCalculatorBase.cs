@@ -4,19 +4,23 @@ using System.Linq;
 
 namespace CostCalculator
 {
-    abstract class CostCalculatorBase<T>
+    abstract class CostCalculatorBase<T, Tindex> where Tindex: struct, IConvertible where T: IComparable
     {
         /// <summary>
         /// represent set of ids used to discount calculation
         /// </summary>
-        protected ISaleItemsRepository<T> _repository;
+        protected ISaleItemsRepository<T, Tindex> _repository;
         /// <summary>
         /// list of rules used to discount calculation
         /// </summary>
         protected List<Func<CalculateUnit<T>, CalculateUnit<T>>> _rules;
 
-        protected CostCalculatorBase(ISaleItemsRepository<T> repository)
+        protected CostCalculatorBase(ISaleItemsRepository<T, Tindex> repository)
         {
+            if (!typeof(Tindex).IsEnum)
+            {
+                throw new ArgumentException("T must be an enumerated type");
+            }
             _repository = repository;
             _rules = new List<Func<CalculateUnit<T>, CalculateUnit<T>>>();
         }
@@ -32,6 +36,11 @@ namespace CostCalculator
             }
 
             SetRules();
+            if (!ValidateAlphabet())
+            {
+                throw new Exception("repository do not contains required items");
+            }
+
             var unit = new CalculateUnit<T>
             {
                 NotCalculatedProducts = products.ToList()
@@ -43,6 +52,21 @@ namespace CostCalculator
             }
 
             return unit.Cost + unit.NotCalculatedProducts.Sum(x => x.Cost);
+        }
+
+        /// <summary>
+        /// check calculate rules
+        /// </summary>
+        protected bool ValidateAlphabet()
+        {
+            foreach (Tindex i in Enum.GetValues(typeof(Tindex)))
+            {
+                if (_repository.ElementAt(i) == null)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>
@@ -73,7 +97,7 @@ namespace CostCalculator
             var useInDiscount = new List<IProductComparable<T>>();
             foreach (var id in ids)
             {
-                useInDiscount.Add(unit.NotCalculatedProducts.FirstOrDefault(x => x.IsMatch(id)));
+                useInDiscount.Add(unit.NotCalculatedProducts.FirstOrDefault(x => x.Id.CompareTo(id) == 0));
             }
             if (!useInDiscount.Any(x => x == null))
             {
